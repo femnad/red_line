@@ -38,7 +38,7 @@ handle_battery_status(Status, _) when Status == "Charging" ->
     timer:sleep(?NORMAL_SLEEP);
 handle_battery_status(_, Percent) ->
     if Percent =< ?CRITICAL_PERCENT ->
-            Percentage = io_lib:format("~i", [Percent]),
+            Percentage = lists:flatten(io_lib:format("~p%", [Percent])),
             notify("Battery Low", Percentage),
             timer:sleep(?WARNING_SLEEP);
        true ->
