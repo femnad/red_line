@@ -1,9 +1,10 @@
 -module(red_line).
 
 %% API exports
--export([main/1]).
+-export([main/1, acpi_parse_test/0]).
 
 -define(CRITICAL_PERCENT, 13).
+-define(FULL_SLEEP, 5 * 60 * 1000).
 -define(NORMAL_SLEEP, 60 * 1000).
 -define(PID_FILE, "/tmp/red_line.pid").
 -define(WARNING_SLEEP, 5 * 1000).
@@ -61,7 +62,9 @@ check_loop() ->
             % Hope for the best and try again
             check_loop();
         full ->
-            notify("Battery Full", "Adapter away!");
+            notify("Battery Full", "Adapter away!"),
+            timer:sleep(?FULL_SLEEP),
+            check_loop();
         {Status, Percent} ->
             handle_battery_status(Status, Percent)
     end,
@@ -106,8 +109,9 @@ start() ->
             end
     end.
 
--ifdef(TEST).
 acpi_parse_test() ->
     FullAcpi = "Battery 0: Full, 100%\n",
-    true = parse_acpi_output(FullAcpi) == full.
--endif.
+    full = parse_acpi_output(FullAcpi),
+    SomeNonCriticalBattery = "Battery 0: Discharging, 60%, 01:59:37 remaining",
+    {"Discharging", 60} = parse_acpi_output(SomeNonCriticalBattery),
+    ok.
