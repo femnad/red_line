@@ -60,6 +60,8 @@ check_loop() ->
         unknown ->
             % Hope for the best and try again
             check_loop();
+        full ->
+            notify("Battery Full", "Adapter away!");
         {Status, Percent} ->
             handle_battery_status(Status, Percent)
     end,
